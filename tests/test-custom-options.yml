@@ -1,0 +1,52 @@
+name: Test custom username, color, and avatar overrides
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "Custom Options Test"
+          username: "CI Bot"
+          avatar_url: "https://example.com/avatar.png"
+          color: "65280"
+          notimestamp: "true"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload output is set
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected payload output to be non-empty"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert payload contains custom username
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if echo "$PAYLOAD" | grep -q '"username"'; then
+            echo "PASS: payload contains username field"
+          else
+            echo "FAIL: payload does not contain username field"
+            exit 1
+          fi
+      - name: Assert payload contains custom color
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          # Color 65280 = 0x00FF00 (green)
+          if echo "$PAYLOAD" | grep -q '65280'; then
+            echo "PASS: payload contains custom color value"
+          else
+            echo "FAIL: payload does not contain custom color value 65280"
+            exit 1
+          fi

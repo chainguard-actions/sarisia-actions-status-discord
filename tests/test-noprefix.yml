@@ -1,0 +1,55 @@
+name: Test noprefix option suppresses status prefix in title
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: with-prefix
+        uses: .
+        with:
+          status: success
+          title: "MyWorkflow"
+          noprefix: "false"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload with prefix contains status word
+        env:
+          PAYLOAD: ${{ steps.with-prefix.outputs.payload }}
+        run: |
+          echo "payload with prefix: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected payload output to be non-empty"
+            exit 1
+          fi
+          # With noprefix=false, title should include "Success" or similar prefix
+          if echo "$PAYLOAD" | grep -qi 'success'; then
+            echo "PASS: payload title contains status prefix"
+          else
+            echo "FAIL: payload title does not contain status prefix"
+            exit 1
+          fi
+      - id: without-prefix
+        uses: .
+        with:
+          status: success
+          title: "MyWorkflow"
+          noprefix: "true"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload without prefix contains exact title
+        env:
+          PAYLOAD: ${{ steps.without-prefix.outputs.payload }}
+        run: |
+          echo "payload without prefix: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected payload output to be non-empty"
+            exit 1
+          fi
+          if echo "$PAYLOAD" | grep -q 'MyWorkflow'; then
+            echo "PASS: payload contains the exact title"
+          else
+            echo "FAIL: payload does not contain the exact title 'MyWorkflow'"
+            exit 1
+          fi

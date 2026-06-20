@@ -1,0 +1,41 @@
+name: Test failure status with suppressed context and detail
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: failure
+          title: "CI Failed"
+          description: "Something went wrong"
+          nocontext: "true"
+          nodetail: "true"
+          noprefix: "false"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload output is set
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected payload output to be non-empty"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert payload contains failure color indicator
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          # Failure color is typically red (16711680 = 0xFF0000)
+          if echo "$PAYLOAD" | grep -q '"color"'; then
+            echo "PASS: payload contains color field"
+          else
+            echo "FAIL: payload does not contain color field"
+            exit 1
+          fi
