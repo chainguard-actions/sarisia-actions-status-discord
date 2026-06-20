@@ -1,0 +1,48 @@
+name: Test payload content with custom inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "My Custom Title"
+          description: "Custom description text"
+          username: "CI Bot"
+          nocontext: "true"
+          nodetail: "true"
+          notimestamp: "true"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload is valid JSON
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: payload is empty"
+            exit 1
+          fi
+          echo "$PAYLOAD" | python3 -m json.tool > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "FAIL: payload is not valid JSON"
+            exit 1
+          fi
+          echo "PASS: payload is valid JSON"
+      - name: Assert payload contains username
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if ! echo "$PAYLOAD" | grep -q "CI Bot"; then
+            echo "FAIL: payload does not contain username 'CI Bot'"
+            exit 1
+          fi
+          echo "PASS: payload contains username"
