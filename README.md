@@ -1,14 +1,6 @@
 # sarisia/actions-status-discord
 
-Post Github Actions CI status to Discord
-
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/sarisia/actions-status-discord](https://github.com/sarisia/actions-status-discord).
-
-## Versions
-
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v1.16.0-pre.0 | [`v1.16.0-pre.0`](https://github.com/chainguard-actions/sarisia-actions-status-discord/tree/v1.16.0-pre.0) | [`f9aa558`](https://github.com/sarisia/actions-status-discord/commit/f9aa558a3c734004c8b3c4340d8a433acdab5f33) |
+Hardened GitHub Action by [Chainguard](https://www.chainguard.dev).
 
 ## Privacy
 

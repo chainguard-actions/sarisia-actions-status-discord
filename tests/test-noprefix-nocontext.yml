@@ -1,0 +1,44 @@
+name: Test noprefix and nocontext options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "Clean Title"
+          noprefix: "true"
+          nocontext: "true"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload is produced
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected payload output to be non-empty"
+            exit 1
+          fi
+          echo "PASS: payload produced with noprefix and nocontext"
+      - name: Assert payload contains title without status prefix
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          if ! echo "$PAYLOAD" | grep -q "Clean Title"; then
+            echo "FAIL: payload does not contain the title"
+            exit 1
+          fi
+          # With noprefix=true, "Success" prefix should not appear before the title
+          if echo "$PAYLOAD" | grep -q "Success.*Clean Title"; then
+            echo "FAIL: payload appears to have status prefix before title (noprefix should suppress this)"
+            exit 1
+          fi
+          echo "PASS: title present without status prefix"
