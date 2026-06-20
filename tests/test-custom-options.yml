@@ -1,0 +1,59 @@
+name: Test custom options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "Custom Title"
+          description: "Custom description text"
+          content: "Hello @everyone"
+          color: "3066993"
+          username: "CI Bot"
+          avatar_url: "https://example.com/avatar.png"
+          url: "https://github.com"
+          nocontext: "true"
+          noprefix: "true"
+          notimestamp: "true"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload is non-empty
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected payload to be non-empty"
+            exit 1
+          fi
+          echo "PASS"
+      - name: Assert payload contains custom username
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if echo "$PAYLOAD" | grep -q 'CI Bot'; then
+            echo "PASS: payload contains custom username"
+          else
+            echo "FAIL: payload does not contain custom username 'CI Bot'"
+            exit 1
+          fi
+      - name: Assert payload contains custom content
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if echo "$PAYLOAD" | grep -q 'Hello @everyone'; then
+            echo "PASS: payload contains custom content"
+          else
+            echo "FAIL: payload does not contain custom content"
+            exit 1
+          fi
