@@ -1,0 +1,32 @@
+name: Test noprefix and notimestamp options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "Clean Title"
+          noprefix: "true"
+          notimestamp: "true"
+          nocontext: "true"
+          nodetail: "true"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload is produced with noprefix and notimestamp
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected non-empty payload"
+            exit 1
+          fi
+          echo "PASS"
