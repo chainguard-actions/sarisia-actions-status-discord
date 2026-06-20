@@ -1,1 +1,15 @@
-# sarisia-actions-status-discord
+# sarisia/actions-status-discord
+
+Post Github Actions CI status to Discord
+
+Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/sarisia/actions-status-discord](https://github.com/sarisia/actions-status-discord).
+
+## Versions
+
+| Version | Tag | Upstream commit |
+|---------|-----|-----------------|
+| v1.16.0-pre.0 | [`v1.16.0-pre.0`](https://github.com/chainguard-actions/sarisia-actions-status-discord/tree/v1.16.0-pre.0) | [`f9aa558`](https://github.com/sarisia/actions-status-discord/commit/f9aa558a3c734004c8b3c4340d8a433acdab5f33) |
+
+## Privacy
+
+This Action contacts Chainguard's licensing server to verify authorization. Connection metadata (IP address, GitHub repository identifier, timestamp, and any metadata encoded in the auth token) is transmitted to Chainguard, Inc. even if authorization is denied in accordance with our [Privacy Notice](https://www.chainguard.dev/legal/privacy-notice)
