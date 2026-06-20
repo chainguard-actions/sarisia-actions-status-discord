@@ -11,6 +11,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v1.15.4 | [`v1.15.4`](https://github.com/chainguard-actions/sarisia-actions-status-discord/tree/v1.15.4) | [`11a0bfe`](https://github.com/sarisia/actions-status-discord/commit/11a0bfe3b50977e38aa2bd4a4ebd296415e83c19) |
 | v1.15.5 | [`v1.15.5`](https://github.com/chainguard-actions/sarisia-actions-status-discord/tree/v1.15.5) | [`b8381b2`](https://github.com/sarisia/actions-status-discord/commit/b8381b25576cb341b2af39926ab42c5056cc44ed) |
 | v1.15.5-pre.0 | [`v1.15.5-pre.0`](https://github.com/chainguard-actions/sarisia-actions-status-discord/tree/v1.15.5-pre.0) | [`af3d457`](https://github.com/sarisia/actions-status-discord/commit/af3d457e68659015b8509165a982cf7fab593a9c) |
+| v1.16.0 | [`v1.16.0`](https://github.com/chainguard-actions/sarisia-actions-status-discord/tree/v1.16.0) | [`eb045af`](https://github.com/sarisia/actions-status-discord/commit/eb045afee445dc055c18d3d90bd0f244fd062708) |
 | v1.16.0-pre.0 | [`v1.16.0-pre.0`](https://github.com/chainguard-actions/sarisia-actions-status-discord/tree/v1.16.0-pre.0) | [`f9aa558`](https://github.com/sarisia/actions-status-discord/commit/f9aa558a3c734004c8b3c4340d8a433acdab5f33) |
 
 ## Privacy
