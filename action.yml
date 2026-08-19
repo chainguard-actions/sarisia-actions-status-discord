@@ -1,6 +1,7 @@
 name: "Actions Status Discord"
 description: "Post Github Actions CI status to Discord"
 author: "Sarisia"
+
 inputs:
   webhook:
     description: "Discord webhook endpoint. If not set, env.DISCORD_WEBHOOK will be used."
@@ -61,13 +62,16 @@ inputs:
     description: "Suppress error which raised when webhook is not set"
     required: false
     default: "false"
+
 outputs:
   payload:
     description: "Discord webhook payload"
+
 runs:
+  pre: chainguard-phonehome.js
   using: "node24"
   main: "lib/index.js"
-  pre: chainguard-phonehome.js
+
 branding:
   color: "blue"
   icon: "send"

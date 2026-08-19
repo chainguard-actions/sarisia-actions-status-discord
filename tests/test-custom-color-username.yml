@@ -1,4 +1,4 @@
-name: Test basic usage (no webhook, ack_no_webhook)
+name: Test custom color and username
 on:
   workflow_dispatch:
 jobs:
@@ -10,8 +10,11 @@ jobs:
         uses: .
         with:
           status: success
+          title: "Custom Styled Notification"
+          color: "16711680"
+          username: "CI Bot"
           ack_no_webhook: "true"
-      - name: Assert payload is non-empty
+      - name: Assert payload contains custom color
         env:
           ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
@@ -20,15 +23,18 @@ jobs:
             echo "FAIL: expected payload to be non-empty"
             exit 1
           fi
-          echo "PASS: payload is present"
-      - name: Assert payload contains success color
+          if ! echo "$ACTUAL" | grep -q "16711680"; then
+            echo "FAIL: expected payload to contain custom color 16711680"
+            exit 1
+          fi
+          echo "PASS: payload contains custom color"
+      - name: Assert payload contains custom username
         env:
           ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
           echo "actual: $ACTUAL"
-          # Success color is typically green (3066993 = 0x2ECC71)
-          if ! echo "$ACTUAL" | grep -q '"color"'; then
-            echo "FAIL: expected payload to contain color field"
+          if ! echo "$ACTUAL" | grep -q "CI Bot"; then
+            echo "FAIL: expected payload to contain username 'CI Bot'"
             exit 1
           fi
-          echo "PASS: payload contains color field"
+          echo "PASS: payload contains custom username"

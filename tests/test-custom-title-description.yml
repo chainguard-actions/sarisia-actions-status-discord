@@ -1,0 +1,35 @@
+name: Test custom title and description
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "My Custom Title"
+          description: "My Custom Description"
+          ack_no_webhook: "true"
+      - name: Assert payload contains custom title
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "My Custom Title"; then
+            echo "FAIL: expected payload to contain custom title 'My Custom Title'"
+            exit 1
+          fi
+          echo "PASS: payload contains custom title"
+      - name: Assert payload contains custom description
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "My Custom Description"; then
+            echo "FAIL: expected payload to contain custom description 'My Custom Description'"
+            exit 1
+          fi
+          echo "PASS: payload contains custom description"

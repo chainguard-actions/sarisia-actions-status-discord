@@ -1,4 +1,4 @@
-name: Test basic usage (no webhook, ack_no_webhook)
+name: Test nocontext and nodetail flags
 on:
   workflow_dispatch:
 jobs:
@@ -10,6 +10,10 @@ jobs:
         uses: .
         with:
           status: success
+          title: "Minimal Embed"
+          nocontext: "true"
+          nodetail: "true"
+          notimestamp: "true"
           ack_no_webhook: "true"
       - name: Assert payload is non-empty
         env:
@@ -21,14 +25,13 @@ jobs:
             exit 1
           fi
           echo "PASS: payload is present"
-      - name: Assert payload contains success color
+      - name: Assert payload contains title
         env:
           ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
           echo "actual: $ACTUAL"
-          # Success color is typically green (3066993 = 0x2ECC71)
-          if ! echo "$ACTUAL" | grep -q '"color"'; then
-            echo "FAIL: expected payload to contain color field"
+          if ! echo "$ACTUAL" | grep -q "Minimal Embed"; then
+            echo "FAIL: expected payload to contain title 'Minimal Embed'"
             exit 1
           fi
-          echo "PASS: payload contains color field"
+          echo "PASS: payload contains title"

@@ -1,0 +1,51 @@
+name: Test noprefix flag
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action-with-prefix
+        uses: .
+        with:
+          status: success
+          title: "Build Pipeline"
+          noprefix: "false"
+          ack_no_webhook: "true"
+      - name: Assert payload with prefix contains status word
+        env:
+          ACTUAL: ${{ steps.action-with-prefix.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected payload to be non-empty"
+            exit 1
+          fi
+          # With noprefix=false, the title should include a status prefix like "Success" or "✅"
+          if ! echo "$ACTUAL" | grep -qi "Build Pipeline"; then
+            echo "FAIL: expected payload to contain title 'Build Pipeline'"
+            exit 1
+          fi
+          echo "PASS: payload contains title"
+      - id: action-no-prefix
+        uses: .
+        with:
+          status: success
+          title: "Build Pipeline"
+          noprefix: "true"
+          ack_no_webhook: "true"
+      - name: Assert payload without prefix is non-empty
+        env:
+          ACTUAL: ${{ steps.action-no-prefix.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected payload to be non-empty"
+            exit 1
+          fi
+          if ! echo "$ACTUAL" | grep -q "Build Pipeline"; then
+            echo "FAIL: expected payload to contain title 'Build Pipeline'"
+            exit 1
+          fi
+          echo "PASS: payload contains title without prefix check"

@@ -1,46 +1,44 @@
-name: Test failure status with suppressed fields
+name: Test failure status
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: action
         uses: .
         with:
           status: failure
-          title: "Failed Build"
-          description: "Something went wrong"
-          nocontext: "true"
-          noprefix: "false"
-          nodetail: "true"
-          notimestamp: "true"
-          nofail: "true"
+          title: "CI Build"
           ack_no_webhook: "true"
       - name: Assert payload is non-empty
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          if [ -z "$PAYLOAD" ]; then
-            echo "FAIL: expected payload to be non-empty"
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: expected payload to be non-empty for failure status"
             exit 1
           fi
-          echo "PASS"
-      - name: Assert payload contains failure color indicator
+          echo "PASS: payload is present for failure status"
+      - name: Assert payload contains color field (failure color)
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          # Failure color in Discord is typically red (16711680 = 0xFF0000)
-          # Just verify the payload is valid JSON-like content
-          if echo "$PAYLOAD" | grep -q '"embeds"'; then
-            echo "PASS: payload contains embeds"
-          else
-            echo "FAIL: payload does not contain embeds field"
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q '"color"'; then
+            echo "FAIL: expected payload to contain color field"
             exit 1
           fi
+          echo "PASS: payload contains color field"
+      - name: Assert payload contains title
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "CI Build"; then
+            echo "FAIL: expected payload to contain title 'CI Build'"
+            exit 1
+          fi
+          echo "PASS: payload contains title"
