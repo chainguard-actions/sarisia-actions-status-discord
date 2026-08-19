@@ -1,12 +1,9 @@
-name: Test basic usage (no webhook, ack suppressed)
+name: Test basic usage
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: action
@@ -23,7 +20,17 @@ jobs:
         run: |
           echo "payload: $PAYLOAD"
           if [ -z "$PAYLOAD" ]; then
-            echo "FAIL: expected non-empty payload output"
+            echo "FAIL: expected payload output to be non-empty"
             exit 1
           fi
-          echo "PASS"
+          echo "PASS: payload is present"
+      - name: Assert payload contains title
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          if ! echo "$PAYLOAD" | grep -q "Test Workflow"; then
+            echo "FAIL: expected payload to contain 'Test Workflow'"
+            exit 1
+          fi
+          echo "PASS: payload contains title"

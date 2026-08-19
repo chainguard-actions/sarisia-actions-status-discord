@@ -1,0 +1,29 @@
+name: Test no webhook with nofail
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "No Webhook Test"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert workflow did not fail
+        run: |
+          echo "PASS: workflow continued despite no webhook being set"
+      - name: Assert payload output exists
+        env:
+          PAYLOAD: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "payload: $PAYLOAD"
+          # Even without a webhook, the payload should be generated
+          if [ -z "$PAYLOAD" ]; then
+            echo "FAIL: expected payload output to be non-empty even without webhook"
+            exit 1
+          fi
+          echo "PASS: payload is present"

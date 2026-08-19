@@ -1,4 +1,4 @@
-name: Test failure status
+name: Test cancelled status and overrides
 on:
   workflow_dispatch:
 jobs:
@@ -9,9 +9,12 @@ jobs:
       - id: action
         uses: .
         with:
-          status: failure
-          title: "Failure Status Test"
-          description: "This simulates a failed job notification"
+          status: cancelled
+          title: "Cancelled Status Test"
+          description: "This simulates a cancelled job notification"
+          username: "CI Bot"
+          avatar_url: "https://github.com/github.png"
+          color: "0x808080"
           nofail: "true"
           ack_no_webhook: "true"
       - name: Assert payload output is non-empty
@@ -24,15 +27,13 @@ jobs:
             exit 1
           fi
           echo "PASS: payload is present"
-      - name: Assert payload contains failure indicator
+      - name: Assert payload contains custom username
         env:
           PAYLOAD: ${{ steps.action.outputs.payload }}
         run: |
           echo "payload: $PAYLOAD"
-          # The payload should contain a color value for failure (red = 16711680 = 0xFF0000)
-          # or contain the word "Failure" in the title prefix
-          if ! echo "$PAYLOAD" | grep -qi "fail"; then
-            echo "FAIL: expected payload to contain failure indicator"
+          if ! echo "$PAYLOAD" | grep -q "CI Bot"; then
+            echo "FAIL: expected payload to contain custom username 'CI Bot'"
             exit 1
           fi
-          echo "PASS: payload contains failure indicator"
+          echo "PASS: payload contains custom username"

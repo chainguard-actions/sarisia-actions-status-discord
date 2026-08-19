@@ -1,4 +1,4 @@
-name: Test failure status
+name: Test custom options
 on:
   workflow_dispatch:
 jobs:
@@ -9,9 +9,13 @@ jobs:
       - id: action
         uses: .
         with:
-          status: failure
-          title: "Failure Status Test"
-          description: "This simulates a failed job notification"
+          status: success
+          title: "Custom Options Test"
+          description: "Testing nocontext, noprefix, nodetail, notimestamp"
+          nocontext: "true"
+          noprefix: "true"
+          nodetail: "true"
+          notimestamp: "true"
           nofail: "true"
           ack_no_webhook: "true"
       - name: Assert payload output is non-empty
@@ -24,15 +28,13 @@ jobs:
             exit 1
           fi
           echo "PASS: payload is present"
-      - name: Assert payload contains failure indicator
+      - name: Assert payload contains description
         env:
           PAYLOAD: ${{ steps.action.outputs.payload }}
         run: |
           echo "payload: $PAYLOAD"
-          # The payload should contain a color value for failure (red = 16711680 = 0xFF0000)
-          # or contain the word "Failure" in the title prefix
-          if ! echo "$PAYLOAD" | grep -qi "fail"; then
-            echo "FAIL: expected payload to contain failure indicator"
+          if ! echo "$PAYLOAD" | grep -q "Testing nocontext"; then
+            echo "FAIL: expected payload to contain description text"
             exit 1
           fi
-          echo "PASS: payload contains failure indicator"
+          echo "PASS: payload contains description"
