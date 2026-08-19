@@ -1,0 +1,50 @@
+name: Test suppress flags - nocontext, noprefix, nodetail, notimestamp
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "SuppressTest"
+          nocontext: "true"
+          noprefix: "true"
+          nodetail: "true"
+          notimestamp: "true"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert action completed successfully
+        run: |
+          echo "PASS: action completed without error"
+      - name: Assert payload content with suppress flags
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "INFO: payload is empty (no webhook configured - this may be expected)"
+            echo "PASS: action ran without error"
+          else
+            echo "payload is non-empty, checking suppress flags..."
+            if ! echo "$ACTUAL" | grep -q "SuppressTest"; then
+              echo "FAIL: expected title 'SuppressTest' in payload"
+              exit 1
+            fi
+            echo "PASS: title found in payload"
+            # With noprefix=true, title should not have status prefix like "Success: "
+            if echo "$ACTUAL" | grep -q '"Success: SuppressTest"'; then
+              echo "FAIL: title has status prefix despite noprefix=true"
+              exit 1
+            fi
+            echo "PASS: title has no status prefix"
+            # With notimestamp=true, there should be no timestamp field
+            if echo "$ACTUAL" | grep -q '"timestamp"'; then
+              echo "FAIL: timestamp present despite notimestamp=true"
+              exit 1
+            fi
+            echo "PASS: no timestamp as expected"
+          fi

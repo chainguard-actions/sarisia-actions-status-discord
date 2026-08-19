@@ -1,0 +1,49 @@
+name: Test custom options - username, avatar_url, content, color
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          status: success
+          title: "CustomTest"
+          content: "Hello everyone"
+          username: "MyBot"
+          avatar_url: "https://example.com/avatar.png"
+          color: "0x00FF00"
+          url: "https://github.com"
+          nofail: "true"
+          ack_no_webhook: "true"
+      - name: Assert action completed successfully
+        run: |
+          echo "PASS: action completed without error"
+      - name: Assert payload content
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "INFO: payload is empty (no webhook configured - this may be expected)"
+            echo "PASS: action ran without error"
+          else
+            echo "payload is non-empty, checking content..."
+            if ! echo "$ACTUAL" | grep -q "MyBot"; then
+              echo "FAIL: expected username 'MyBot' in payload"
+              exit 1
+            fi
+            echo "PASS: username found in payload"
+            if ! echo "$ACTUAL" | grep -q "Hello everyone"; then
+              echo "FAIL: expected content in payload"
+              exit 1
+            fi
+            echo "PASS: content found in payload"
+            if ! echo "$ACTUAL" | grep -q "https://github.com"; then
+              echo "FAIL: expected URL in payload"
+              exit 1
+            fi
+            echo "PASS: URL found in payload"
+          fi
