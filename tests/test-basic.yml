@@ -1,4 +1,4 @@
-name: Test basic usage (no webhook, ack suppressed)
+name: Test basic usage
 on:
   workflow_dispatch:
 jobs:
@@ -14,13 +14,34 @@ jobs:
           description: "Basic test run"
           nofail: "true"
           ack_no_webhook: "true"
-      - name: Assert payload output is set
+      - name: Assert payload is non-empty
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          if [ -z "$PAYLOAD" ]; then
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
             echo "FAIL: expected payload output to be non-empty"
             exit 1
           fi
-          echo "PASS"
+          echo "PASS: payload is present"
+      - name: Assert payload contains title
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "Test Workflow"; then
+            echo "FAIL: expected payload to contain 'Test Workflow'"
+            exit 1
+          fi
+          echo "PASS: payload contains title"
+      - name: Assert payload contains success color
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          # Success color is typically 3066993 (green) in decimal
+          if ! echo "$ACTUAL" | grep -qiE '"color"'; then
+            echo "FAIL: expected payload to contain color field"
+            exit 1
+          fi
+          echo "PASS: payload contains color field"

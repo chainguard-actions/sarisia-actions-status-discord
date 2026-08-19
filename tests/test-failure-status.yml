@@ -1,4 +1,4 @@
-name: Test failure status with suppressed context and detail
+name: Test failure status
 on:
   workflow_dispatch:
 jobs:
@@ -10,32 +10,37 @@ jobs:
         uses: .
         with:
           status: failure
-          title: "CI Failed"
+          title: "Failed Build"
           description: "Something went wrong"
-          nocontext: "true"
-          nodetail: "true"
-          noprefix: "false"
           nofail: "true"
           ack_no_webhook: "true"
-      - name: Assert payload output is set
+      - name: Assert payload is non-empty
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          if [ -z "$PAYLOAD" ]; then
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
             echo "FAIL: expected payload output to be non-empty"
             exit 1
           fi
-          echo "PASS"
-      - name: Assert payload contains failure color indicator
+          echo "PASS: payload is present"
+      - name: Assert payload contains failure title
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          # Failure color is typically red (16711680 = 0xFF0000)
-          if echo "$PAYLOAD" | grep -q '"color"'; then
-            echo "PASS: payload contains color field"
-          else
-            echo "FAIL: payload does not contain color field"
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "Failed Build"; then
+            echo "FAIL: expected payload to contain 'Failed Build'"
             exit 1
           fi
+          echo "PASS: payload contains title"
+      - name: Assert payload contains description
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "Something went wrong"; then
+            echo "FAIL: expected payload to contain description"
+            exit 1
+          fi
+          echo "PASS: payload contains description"

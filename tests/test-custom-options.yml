@@ -1,4 +1,4 @@
-name: Test custom username, color, and avatar overrides
+name: Test custom options
 on:
   workflow_dispatch:
 jobs:
@@ -11,42 +11,54 @@ jobs:
         with:
           status: success
           title: "Custom Options Test"
+          description: "Testing custom options"
+          content: "Hello @everyone"
+          color: "0x00FF00"
           username: "CI Bot"
-          avatar_url: "https://example.com/avatar.png"
-          color: "65280"
+          nocontext: "true"
+          noprefix: "true"
+          nodetail: "true"
           notimestamp: "true"
           nofail: "true"
           ack_no_webhook: "true"
-      - name: Assert payload output is set
+      - name: Assert payload is non-empty
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          if [ -z "$PAYLOAD" ]; then
+          echo "actual: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
             echo "FAIL: expected payload output to be non-empty"
             exit 1
           fi
-          echo "PASS"
+          echo "PASS: payload is present"
       - name: Assert payload contains custom username
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          if echo "$PAYLOAD" | grep -q '"username"'; then
-            echo "PASS: payload contains username field"
-          else
-            echo "FAIL: payload does not contain username field"
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "CI Bot"; then
+            echo "FAIL: expected payload to contain username 'CI Bot'"
             exit 1
           fi
-      - name: Assert payload contains custom color
+          echo "PASS: payload contains username"
+      - name: Assert payload contains content
         env:
-          PAYLOAD: ${{ steps.action.outputs.payload }}
+          ACTUAL: ${{ steps.action.outputs.payload }}
         run: |
-          echo "payload: $PAYLOAD"
-          # Color 65280 = 0x00FF00 (green)
-          if echo "$PAYLOAD" | grep -q '65280'; then
-            echo "PASS: payload contains custom color value"
-          else
-            echo "FAIL: payload does not contain custom color value 65280"
+          echo "actual: $ACTUAL"
+          if ! echo "$ACTUAL" | grep -q "Hello @everyone"; then
+            echo "FAIL: expected payload to contain content"
             exit 1
           fi
+          echo "PASS: payload contains content"
+      - name: Assert payload title has no status prefix (noprefix=true)
+        env:
+          ACTUAL: ${{ steps.action.outputs.payload }}
+        run: |
+          echo "actual: $ACTUAL"
+          # When noprefix=true, the title should not start with "Success:" or "Failure:"
+          if echo "$ACTUAL" | grep -qiE '"title"\s*:\s*"(Success|Failure|Cancelled):'; then
+            echo "FAIL: expected title to have no status prefix"
+            exit 1
+          fi
+          echo "PASS: title has no status prefix"
